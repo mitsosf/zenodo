@@ -65,6 +65,7 @@ from .permissions import RecordPermission
 from .proxies import current_custom_metadata
 from .serializers import citeproc_v1
 from .serializers.json import ZenodoJSONSerializer
+from ..spam.models import WhitelistEntry
 
 blueprint = Blueprint(
     'zenodo_records',
@@ -99,6 +100,18 @@ def extra_formats_title(mimetype):
     """Return a dict of a record's available extra formats and their title."""
     return ExtraFormats.mimetype_whitelist.get(mimetype, '')
 
+
+@blueprint.app_template_test('whitelisted_record')
+def is_whitelisted_record(record):
+    """Check if record creators are whitelisted."""
+    return WhitelistEntry.get_record_status(record)
+
+@blueprint.app_template_test('whitelisted_user')
+def is_whitelisted_user(user):
+    """Check if record creators are whitelisted."""
+    if not WhitelistEntry.query.get(user.id):
+        return False
+    return True
 
 @blueprint.app_template_filter('pidstatus')
 def pidstatus_title(pid):

@@ -776,7 +776,10 @@
       },
       "version": {
         "type": "keyword"
-      }
+      },
+      "_whitelisted": {
+                "type": "boolean"
+              }
     }
   }
 }

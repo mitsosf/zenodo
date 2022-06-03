@@ -56,7 +56,31 @@
 <div class="list-group-item col-sm-6">
   <strong>Login count:</strong> {{user.login_count}}
 </div>
+<div class="list-group-item col-sm-6">
+  <div class="col-sm-4">
+    <strong style="float: left;">Whitelisted: </strong>
+    {{user is whitelisted_user}}
+  </div>
+  <div class="col-sm-8">
+    {{ whitelist_action( user.id,
+    "delete" if user is whitelisted_user else "post")
+    }}
+  </div>
+</div>
 {%- endmacro %}
+
+{%- macro whitelist_action(user_id, action) %}
+  <form action="{{ url_for('zenodo_spam.whitelist_add_remove',
+      user_id=user_id) }}" style="" method="POST">
+    <input name="_method" type="hidden" value="{{ action }}">
+    <input name="next" type="hidden" value="{{ url_for('zenodo_spam.delete',
+      user_id=user_id) }}">
+    <button
+      class="btn btn-{{ "info" if action == "post" else "danger" }}"
+      type="submit">{{ "Add" if action == "post" else "Remove" }}
+    </button>
+  </form>
+{% endmacro %}
 
 {%- macro bucket_list(record) %}
 <tr>
