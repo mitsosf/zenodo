@@ -57,26 +57,25 @@
   <strong>Login count:</strong> {{user.login_count}}
 </div>
 <div class="list-group-item col-sm-6">
-  <div class="col-sm-4">
-    <strong style="float: left;">Whitelisted: </strong>
-    {{user is whitelisted_user}}
-  </div>
+    <strong style="float: left">Whitelisted: </strong>
   <div class="col-sm-8">
-    {{ whitelist_action( user.id,
+    {{ whitelist_action( user,
     "delete" if user is whitelisted_user else "post")
     }}
   </div>
 </div>
 {%- endmacro %}
 
-{%- macro whitelist_action(user_id, action) %}
+{%- macro whitelist_action(user, action) %}
+  {{user is whitelisted_user}}
   <form action="{{ url_for('zenodo_spam.whitelist_add_remove',
-      user_id=user_id) }}" style="" method="POST">
+      user_id=user.id) }}" style="float: right;" method="POST">
     <input name="_method" type="hidden" value="{{ action }}">
     <input name="next" type="hidden" value="{{ url_for('zenodo_spam.delete',
-      user_id=user_id) }}">
+      user_id=user.id) }}">
     <button
       class="btn btn-{{ "info" if action == "post" else "danger" }}"
+      style="height: 20px;padding: 2px"
       type="submit">{{ "Add" if action == "post" else "Remove" }}
     </button>
   </form>

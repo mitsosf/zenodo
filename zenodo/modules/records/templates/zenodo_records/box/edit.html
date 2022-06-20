@@ -81,9 +81,10 @@
                value="{{ url_for('invenio_records_ui.recid',
                pid_value=pid.pid_value) }}"
         />
-        <button class="btn btn-warning btn-block" type="submit" {{
-          'disabled' if edit_disabled else ''}}><i class="fa
-          fa-pencil-square-o"></i> Remove from whitelist</button>
+        <button class="btn btn-link" type="submit" {{
+          'disabled' if edit_disabled else ''}}><div style="color: #f0ad4e">
+          <i class="fa fa-pencil-square-o"></i> Remove from whitelist</div>
+        </button>
       </form>
     </li>
     {% else %}
@@ -95,9 +96,10 @@
                value="{{ url_for('invenio_records_ui.recid',
                pid_value=pid.pid_value) }}"
         />
-        <button class="btn btn-info btn-block" type="submit" {{
-          'disabled' if edit_disabled else ''}}><i class="fa
-          fa-pencil-square-o"></i> Add to whitelist</button>
+        <button class="btn btn-link" type="submit" {{
+          'disabled' if edit_disabled else ''}}><div style="color: #6aa3d5">
+          <i class="fa fa-pencil-square-o"></i> Add to whitelist</div>
+        </button>
       </form>
     </li>
     {% endif %}
