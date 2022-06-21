@@ -44,11 +44,11 @@ def apply_version_filters(search, urlkwargs):
         search = search.filter(Q('term', **{'relations.version.is_last': True}))
     return (search, urlkwargs)
 
-def apply_whitelist_filter(search, urlkwargs):
-    """Apply whitelist filter to search."""
-    if current_app.config.get('ZENODO_RECORDS_SEARCH_WHITELIST', False) and \
+def apply_safelist_filter(search, urlkwargs):
+    """Apply safelist filter to search."""
+    if current_app.config.get('ZENODO_RECORDS_SEARCH_SAFELIST', False) and \
         not urlkwargs.get('q'):
-            search = search.filter(Q('term', _whitelisted=True))
+            search = search.filter(Q('term', _safelisted=True))
 
     return (search, urlkwargs)
 
@@ -56,4 +56,4 @@ def apply_whitelist_filter(search, urlkwargs):
 def search_factory(self, search, query_parser=None):
     """Search factory."""
     search, urlkwargs = _es_search_factory(self, search)
-    return apply_whitelist_filter(*apply_version_filters(search, urlkwargs))
+    return apply_safelist_filter(*apply_version_filters(search, urlkwargs))

@@ -44,7 +44,7 @@ from invenio_search.api import RecordsSearch
 
 from zenodo.modules.deposit.utils import delete_record
 from zenodo.modules.spam.forms import DeleteSpamForm
-from zenodo.modules.spam.models import WhitelistEntry
+from zenodo.modules.spam.models import SafelistEntry
 
 blueprint = Blueprint(
     'zenodo_spam',
@@ -105,29 +105,29 @@ def delete(user_id):
         ctx.update(records=records)
         return render_template('zenodo_spam/delete.html', **ctx)
 
-@blueprint.route('/<int:user_id>/whitelist', methods=['POST'])
+@blueprint.route('/<int:user_id>/safelist', methods=['POST'])
 @login_required
-def whitelist_add_remove(user_id):
-    """Add or remove user from spam whitelist."""
+def safelist_add_remove(user_id):
+    """Add or remove user from spam safelist."""
     # Only admin can access this view
     if not Permission(ActionNeed('admin-access')).can():
         abort(403)
 
     user = User.query.get(user_id)
     if request.form['_method'] == 'post':
-        # Create whitelist entry
-        WhitelistEntry.create(user_id=user.id, notes='Added by {} ({})'.format(
+        # Create safelist entry
+        SafelistEntry.create(user_id=user.id, notes='Added by {} ({})'.format(
             current_user.email, current_user.id))
 
-        flash("Added to whitelist", category='success')
+        flash("Added to safelist", category='success')
     else:
-        # Remove whitelist entry
-        WhitelistEntry.remove_by_user_id(user.id)
-        flash("Removed from whitelist", category='warning')
+        # Remove safelist entry
+        SafelistEntry.remove_by_user_id(user.id)
+        flash("Removed from safelist", category='warning')
 
     rs = RecordsSearch().filter('term', owners=user_id).source(False)
     index_threshold = current_app.config.get(
-        'ZENODO_RECORDS_WHITELIST_INDEX_THRESHOLD', 1000)
+        'ZENODO_RECORDS_SAFELIST_INDEX_THRESHOLD', 1000)
     if rs.count() < index_threshold:
         for record in rs.scan():
             RecordIndexer().index_by_id(record.meta.id)

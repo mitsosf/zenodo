@@ -24,7 +24,7 @@ def upgrade():
     """Upgrade database."""
 
     op.create_table(
-        'whitelist_entries',
+        'safelist_entries',
         sa.Column('user_id', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ['accounts_user'],
@@ -42,4 +42,4 @@ def upgrade():
 
 def downgrade():
     """Downgrade database."""
-    op.drop_table('whitelist_entries')
+    op.drop_table('safelist_entries')

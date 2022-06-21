@@ -32,10 +32,10 @@ from invenio_db import db
 from sqlalchemy.dialects import mysql
 from sqlalchemy_utils.types import UUIDType
 
-class WhitelistEntry(db.Model):
+class SafelistEntry(db.Model):
     """Defines a message to show to users."""
 
-    __tablename__ = "whitelist_entries"
+    __tablename__ = "safelist_entries"
     __versioned__ = {"versioning": False}
 
     user_id = db.Column(
@@ -44,13 +44,13 @@ class WhitelistEntry(db.Model):
         primary_key=True,
         nullable=False
     )
-    """The whitelisted user."""
+    """The safelisted user."""
 
     notes = db.Column(
         db.Text,
         nullable=True
     )
-    """Notes about the whitelisting."""
+    """Notes about the safelisting."""
 
     created = db.Column(
         db.DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"),
@@ -60,12 +60,15 @@ class WhitelistEntry(db.Model):
 
     @classmethod
     def create(cls, user_id, notes=None):
-        entry = cls(user_id=user_id, notes=notes)
+        try:
+            entry = cls(user_id=user_id, notes=notes)
+            db.session.add(entry)
+            db.session.commit()
+            return entry
+        except:
+            return None
 
-        db.session.add(entry)
-        db.session.commit()
 
-        return entry
 
     @classmethod
     def get_by_user_id(cls, user_id):
@@ -77,10 +80,12 @@ class WhitelistEntry(db.Model):
     @classmethod
     def remove_by_user_id(cls, user_id):
         """Delete entry by user_id."""
-
-        entry = cls.query.filter(cls.user_id == user_id).first()
-        db.session.delete(entry)
-        db.session.commit()
+        try:
+            entry = cls.query.filter(cls.user_id == user_id).first()
+            db.session.delete(entry)
+            db.session.commit()
+        except:
+            pass
 
     @classmethod
     def get_record_status(cls, record):

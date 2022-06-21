@@ -777,7 +777,7 @@
       "version": {
         "type": "keyword"
       },
-      "_whitelisted": {
+      "_safelisted": {
                 "type": "boolean"
               }
     }
