@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Zenodo.
-# Copyright (C) 2017-2021 CERN.
+# Copyright (C) 2023 CERN.
 #
 # Zenodo is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,17 +22,29 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Zenodo module that adds support for notifications."""
+"""Notifications tasks."""
 from __future__ import absolute_import
 
-from flask import Blueprint, Response
+from celery import shared_task
+from invenio_db import db
 
-blueprint = Blueprint(
-    'zenodo_notifications',
-    __name__
-)
+from .errors import InvalidSenderError
+from .models import PeerReview, PeerReviewStatus
+from .proxies import current_notifications
 
+@shared_task(ignore_result=True, max_retries=5, default_retry_delay=10 * 60)
+def process_peer_review(notification_id, verify_sender=False):
+    """Process a received PeerReview."""
+    peer_review = PeerReview.query.filter(
+        PeerReview.notification_id == notification_id,
+        PeerReview.status.in_([PeerReviewStatus.RECEIVED,
+                               PeerReviewStatus.FAILED]),
+    ).one()
 
-@blueprint.route('/notifications', methods=['GET'])
-def test():
-    return Response('notifications')
+    if verify_sender and not peer_review.verify_sender():
+        peer_review.status = PeerReviewStatus.FAILED
+        raise InvalidSenderError(
+            event=peer_review.event.id, user=peer_review.event.user_id)
+
+    peer_review.status = PeerReviewStatus.PUBLISHED
+    db.session.commit()

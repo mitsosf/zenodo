@@ -24,5 +24,7 @@
 
 """Configuration for Zenodo Notifications."""
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import
 
+ZENODO_NOTIFICATIONS_PROCESS_PEER_REVIEWS=True
+ZENODO_NOTIFICATIONS_PEER_REVIEW_WEBHOOK_RECEIVER_ID='peer-review'
